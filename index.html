@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Login Thwawing Room</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+  <body>
+    <form name="loginForm">
+      <h1>Login</h1>
+      <h3>{{LOCATION}}</h3>
+      <input name="userid" placeholder="User ID" />
+      <input name="pwd" placeholder="Password" type="Password" />
+      <input
+        type="submit"
+        onclick="check(this.form)"
+        class="btn"
+        value="Login"
+      />
+    </form>
+    <div id="bottom-bar">
+      <!-- time, version and location -->
+      <p>Time: 12:00:00</p>
+      <p>Version: {{VERSION}}</p>
+    </div>
+  </body>
+  <script>
+    function check(form) {
+      if (form.userid.value == "admin" && form.pwd.value == "admin") {
+        window.open("/serverIndex");
+      } else {
+        alert("Error Password or Username");
+      }
+    }
+  </script>
+</html>
