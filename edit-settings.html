@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="data:," />
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   </head>
   <body>
     <nav>
@@ -18,25 +19,26 @@
     <div class="content">
       <div id="top-bar">
         <div>
-          <h1 style="margin: 0">Logs</h1>
-          <span>View the log files of each thawning process</span>
+          <h1 style="margin: 0">Edit Settings</h1>
+          <span>Choose the settings you want to edit</span>
         </div>
         <h3>{{LOCATION}}</h3>
       </div>
-      <div class="logs-container">
-        <div class="d-flex justify-sb align-center">
-          <h3>Total Logs: </h3>
-          <b><u>{{TOTAL_LOGS}}</u></b>
+
+      <div class="d-flex justify-center align-center" style="flex: 1">
+        <a href="/edit-config">
+          <div class="card" style="width: 290px; height: 350px">
+            System Settings
+          </div>
+        </a>
+        <a href=""></a>
+        <div class="card" style="width: 290px; height: 350px">
+          Thawing Settings
         </div>
-        <div class="log-cell"><a href="/log">log</a></div>
-        <div class="log-cell"><a href="/log1">log1</a></div>
-        <div class="log-cell"><a href="/log2">log2</a></div>
-        <div class="log-cell"><a href="/log3">log3</a></div>
-        <div class="log-cell"><a href="/log4">log4</a></div>
-        
+    </a>
       </div>
+
       <div id="bottom-bar">
-        <!-- time, version and location -->
         <p>Time: 12:00:00</p>
         <p>Version: {{VERSION}}</p>
       </div>
