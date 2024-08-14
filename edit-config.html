@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ESP32 Web Server</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="data:," />
     <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
   <body>
@@ -11,7 +11,8 @@
       <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/logs">Logs</a></li>
-        <li><a href="/edit-config">Config</a></li>
+        <li><a href="/edit-settings">Config</a></li>
+        <li><a href="/webserial">Web Serial</a></li>
       </ul>
     </nav>
 
@@ -25,56 +26,27 @@
         <h3>{{LOCATION}}</h3>
       </div>
       <form
+        id="configForm"
         style="max-width: 80%; width: 80%; text-align: left"
         action="/update-config"
         method="POST"
       >
         <div class="d-flex justify-sb align-center">
-          <h2>Configuration parameters</h2>
-          <div style="display: flex;">
-            <a href="/download-config">
-              <button class="btn" type="button">Download JSON</button>
-            </a>
+          <h2 id="file-name">Configuration parameters</h2>
+          <div style="display: flex">
+            <button class="btn" type="button" onclick="downloadConfig()">
+              Download JSON
+            </button>
             <br />
-            <a href="/toggle-output">
-              <button class="btn" type="button">Toggle {{WEBSERIAL_STATUS}}</button>
-            </a>
+            <button class="btn" type="button">Toggle</button>
           </div>
         </div>
 
-        <label for="SSID">SSID: </label>
-        <input type="text" name="SSID" value="tapOmeter" />
-        <label for="WIFI_PASSWORD"> WIFI_PASSWORD: </label>
-        <input type="text" name="WIFI_PASSWORD" value="S=klogw2" />
-        <label for="HOST_NAME"> HOST_NAME: </label>
-        <input type="text" name="HOST_NAME" value="esp32-2" />
-        <label for="IP_ADDRESS"> IP_ADDRESS: </label>
-        <input type="text" name="IP_ADDRESS" value="192.168.100.52" />
-        <label for="PORT">PORT: </label>
-        <input type="text" name="PORT" value="1883" />
-        <label for="PASS">PASS: </label>
-        <input type="text" name="PASS" value="" />
-        <label for="MQTT_ID"> MQTT_ID: </label>
-        <input type="text" name="MQTT_ID" value="Chicano_MFP" />
-        <label for="USERNAME"> USERNAME: </label>
-        <input type="text" name="USERNAME" value="chicano" />
-        <label for="MQTT_PASSWORD"> MQTT_PASSWORD: </label>
-        <input type="text" name="MQTT_PASSWORD" value="nomameshugo" />
-        <label for="TIME_ZONE_OFFSET_HRS"> TIME_ZONE_OFFSET_HRS: </label>
-        <input
-          type="text"
-          name="TIME_ZONE_OFFSET_HRS"
-          value="home/bedroom/temperature"
-        />
-        <label for="IR_TS|eneable">IR_TS|eneable: </label>
-        <input type="text" name="IR_TS|eneable" value="false" />
-        <label for="IR_TS|sample_size"> IR_TS|sample_size: </label>
-        <input type="text" name="IR_TS|sample_size" value="7" />
-        <label for="WEB_SERIAL"> WEB_SERIAL: </label>
-        <input type="text" name="WEB_SERIAL" value="true" />
+        <div id="formContent" class="d-flex flex-column"></div>
+
         <input type="submit" value="Save" class="btn" style="width: 30%" />
-        <small>
-          *Caution be sure you are editing the correct values, boot can be
+        <small
+          >*Caution be sure you are editing the correct values, boot can be
           affected</small
         >
         <br />
@@ -82,9 +54,83 @@
     </div>
 
     <div id="bottom-bar">
-      <!-- time, version and location -->
       <p>Time: 12:00:00</p>
       <p>Version: {{VERSION}}</p>
     </div>
+    <script>
+      // Obtener los parámetros de la URL
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+
+      // Por ejemplo, si tienes ?nombre=Juan en la URL
+      const fileName = urlParams.get("file");
+
+      // Mostrar el valor capturado
+      document.getElementById("file-name").textContent = fileName;
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch(fileName)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("File not found, check file name");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const formContent = document.getElementById("formContent");
+            generateFormFields(formContent, data);
+          })
+          .catch((error) => {
+            console.error(
+              "Error could not fetch configuration file:",
+              error
+            );
+            const formContent = document.getElementById("formContent");
+            formContent.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+          });
+      });
+
+      function generateFormFields(container, data, parentKey = "") {
+        for (const key in data) {
+          if (typeof data[key] === "object" && !Array.isArray(data[key])) {
+            generateFormFields(container, data[key], `${parentKey}${key}|`);
+          } else {
+            const label = document.createElement("label");
+            label.setAttribute("for", `${parentKey}${key}`);
+            label.textContent = `${parentKey}${key}: `;
+
+            const input = document.createElement("input");
+            input.setAttribute("type", "text");
+            input.setAttribute("name", `${parentKey}${key}`);
+            input.setAttribute("value", data[key]);
+
+            container.appendChild(label);
+            container.appendChild(input);
+            container.appendChild(document.createElement("br"));
+          }
+        }
+      }
+
+      function downloadConfig() {
+        // Lógica para descargar el archivo config.txt
+        fetch(fileName)
+          .then((response) => response.blob())
+          .then((blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+          })
+          .catch((error) => {
+            console.error(
+              "Error at downloading config file: ",
+              error
+            );
+          });
+      }
+    </script>
   </body>
 </html>
