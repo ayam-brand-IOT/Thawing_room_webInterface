@@ -16,7 +16,7 @@
       </ul>
     </nav>
 
-    <div class="content">
+    <div class="content" style="">
       <div id="top-bar">
         <div>
           <h1 style="margin: 0">Logs</h1>
@@ -27,14 +27,9 @@
       <div class="logs-container">
         <div class="d-flex justify-sb align-center">
           <h3>Total Logs: </h3>
-          <b><u>{{TOTAL_LOGS}}</u></b>
+          <b><u id="count"></u></b>
         </div>
-        <div class="log-cell"><a href="/log">log</a></div>
-        <div class="log-cell"><a href="/log1">log1</a></div>
-        <div class="log-cell"><a href="/log2">log2</a></div>
-        <div class="log-cell"><a href="/log3">log3</a></div>
-        <div class="log-cell"><a href="/log4">log4</a></div>
-        
+        <!-- here logs will be inyected -->
       </div>
       <div id="bottom-bar">
         <!-- time, version and location -->
@@ -42,5 +37,21 @@
         <p>Version: {{VERSION}}</p>
       </div>
     </div>
+    <script>
+        const logs = [
+            //{{LOGS}}
+        ];
+
+        // create logs cells
+        logs.forEach((log, index) => {
+            const logCell = document.createElement("div");
+            logCell.classList.add("log-cell");
+            logCell.innerHTML = `<a href="/download_log?file=${log}">${log}</a>`;
+            document.querySelector(".logs-container").appendChild(logCell);
+        });
+
+        //add total logs
+        document.getElementById("count").innerText = logs.length;
+    </script>
   </body>
 </html>
